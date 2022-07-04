@@ -1,0 +1,21 @@
+{
+  "name": "rxjsConcepts",
+  "version": "1.0.0",
+  "description": "Covering all rxjs concepts",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start:dev": "nodemon"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^18.0.0",
+    "nodemon": "^2.0.18",
+    "ts-node": "^10.8.1",
+    "typescript": "^4.7.4"
+  },
+  "dependencies": {
+    "rxjs": "^6.6.7"
+  }
+}
