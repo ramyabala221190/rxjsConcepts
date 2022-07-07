@@ -42,7 +42,13 @@ These methods correspond to the 3 types of messages an observable can produce.
 
 next() is for pushing the next value to an observer
 error() is for pushing the error message to the observer
-complete() is when observable has finished pushing all values
+complete() is when observable has finished pushing all values to the observer OR an observer
+has received all values it needs to recevie from the observable.
+No values will be pushed to the observer after this executes.
+
+complete() will not called under the below scenarios:
+=>Observable errors out.
+=>If observer unsusbscribes from observable.
 
 4. Three ways you can create observables:
 
@@ -193,17 +199,78 @@ receiving the values.
 =>Observers receive values from the subject. Values are shared amongst the observers.
 
 The above steps can be minimized to a single step using multicasting operators.
+These operators use a normal Subject to make cold observables hot.
 
 1. multicast()
 2. refCount(),
 3. publish(),
 4. share()
 
-We also have 3 specialixed subject operators
+We also have 3 specialized subject operators
 
-1. publishLast()
-2. publishBehavior()
-3. publishReplay()
+1. publishLast():
+=> It uses the AsyncSubject to make cold observables hot.
+=> Observable emits the last value to all its observers irrespective of when they subscribe.
+=>It uses refCount() to trigger the observable to emit values as soon as there is atleast 1 observer.
+
+2. publishBehavior():
+=> It uses the BehaviorSubject to make cold observables hot.
+=> If there are observers subscribed to the subject even before the observable has emitted a value, then
+this operator passes an initial seed value to those observers. This seed value is passed as argument
+to the publishBehavior().
+=> It will not push values to observers which have subscribed to the subject after the observable has
+emitted all values. Only the complete() or error() of these observers will be called.
+=> If the observable has not yet finished emitting all values and we have observers which have subscribed
+late to the subject, then these late observers will recevie the most recent single value emitted by the
+observer before the late observer subscribed.
+=>It uses refCount() to trigger the observable to emit values as soon as there is atleast 1 observer.
+
+3. publishReplay():
+=>It uses ReplaySubjecy to make cold observables hot.
+=> publishReplay() accepts an argument which tells how many previously emitted values must be pushed
+to the late observers.
+=> If no arguments are passed it implies all the previously emitted values must be pushed to the late
+observers.
+=> Here late observers can mean observers that have subscribed to the subject when the observable
+is still emitting values OR the observable has already finished emitting values.
+=>It uses refCount() to trigger the observable to emit values as soon as there is atleast 1 observer.
+
+
+What is the advantage of the 3 specialized operators over share()? 
+
+Lets say we have 2 observers which are going to subscribe to a http.get() observable. 
+1st observer subscribes and the http request begins,completes and 1st observer  receives the data.
+2nd Observer subscribes after 2secs. Instead of sharing the response with the late observer, share() will
+re-execute the observable ie the http request and send the data to the 2nd observer.
+
+The 3 specialized operators(publishBehavior though not suitable for http requests) will not
+reexecute the observable for late subscribers.
+
+publishLast() and publishReplay() will just emit the last value to the late subscribers.
+
+---------------------------------------------------------------------------------------------
+What are Schedulers ?
+
+Schedulers can control when an observable should emit values and when the values must reach the
+observer.
+
+1. queueScheduler: It is used to execute observables synchronously.
+2. asyncScheduler: It is used to execute observables asynchronously.
+3. asapScheduler
+4. animationFrameScheduler
+5. TestScheduler
+
+-----------------------------------------------------------------------------------------------
+Structure of a new operator
+
+function myOperator(config1,config2){
+return function(oldObservable$){
+return newObservable$;
+}
+}
+
+
+
 
 
 

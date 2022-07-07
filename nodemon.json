@@ -2,5 +2,5 @@
     "watch":["src"],
     "ext":".ts,.js",
     "ignore":[],
-    "exec":"ts-node ./src/specialSubjects.ts"
+    "exec":"ts-node ./src/newOperator.ts"
 }
